@@ -70,6 +70,17 @@
             display: inline-block;
         }
 
+        .image-notice {
+            background: rgba(255, 165, 0, 0.1);
+            border: 1px solid #ffa500;
+            color: #ffa500;
+            padding: 1rem;
+            margin: 1rem 2rem;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+
         .controls {
             display: flex;
             justify-content: center;
@@ -187,6 +198,30 @@
 
         .list-view .beast-info {
             flex: 1;
+        }
+
+        .beast-image-link {
+            display: block;
+            text-decoration: none;
+            position: relative;
+        }
+
+        .beast-image-link::after {
+            content: '→ Click to view';
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            background: rgba(0, 255, 65, 0.9);
+            color: #000;
+            padding: 0.3rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .beast-card:hover .beast-image-link::after {
+            opacity: 1;
         }
 
         .beast-image {
@@ -308,10 +343,14 @@
         <div class="subtitle">DIGITAL ASSET PORTFOLIO</div>
         <div class="collection-name">PixelBeasts (Beastopia)</div>
         <div class="description">
-            Strategic accumulation of 163 generative pixel art creatures by @yoheinakajima
+            Strategic accumulation of 100+ generative pixel art creatures by @yoheinakajima
         </div>
         <div class="wallet-address">0x39c71cbcb08af17187f643701655bfd6db467dc7</div>
     </header>
+
+    <div class="image-notice">
+        ℹ️ Image thumbnails shown below. Click any beast to view the full artwork on OpenSea.
+    </div>
 
     <div class="controls">
         <div class="search-box">
@@ -403,12 +442,15 @@
             gallery.innerHTML = beasts.map(beast => {
                 const tokenId = beast.tokenId || 'Unknown';
                 const name = beast.name || `PixelBeast #${tokenId}`;
-                const imageUrl = beast.image || beast.imageUrl || 'https://via.placeholder.com/300?text=No+Image';
-                const openseaUrl = `https://opensea.io/assets/ethereum/0x1acd747b00d65e2e42433f0280e7dcb530de41d7/${tokenId}`;
+                const imageUrl = beast.image || `https://via.placeholder.com/300/1a1a1a/00ff41?text=PixelBeast+%23${tokenId}`;
+                const contractAddress = '0x1acd747b00d65e2e42433f0280e7dcb530de41d7';
+                const openseaUrl = beast.openseaUrl || `https://opensea.io/assets/ethereum/${contractAddress}/${tokenId}`;
 
                 return `
                     <div class="beast-card">
-                        <img src="${imageUrl}" alt="${name}" class="beast-image" loading="lazy">
+                        <a href="${openseaUrl}" target="_blank" class="beast-image-link">
+                            <img src="${imageUrl}" alt="${name}" class="beast-image" loading="lazy">
+                        </a>
                         <div class="beast-info">
                             <div class="beast-name">${name}</div>
                             <div class="beast-id">ID: ${tokenId}</div>
