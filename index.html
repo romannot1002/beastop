@@ -19,10 +19,16 @@
         }
 
         .hero {
-            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.85)), 
+                        url('https://i.imgur.com/Lsw5VPt.jpeg') center center / cover;
             padding: 4rem 2rem 3rem;
             text-align: center;
             border-bottom: 1px solid #333;
+            position: relative;
+            min-height: 500px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .logo {
@@ -41,25 +47,28 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
         .tagline {
             font-size: 1.3rem;
-            color: #999;
+            color: #ddd;
             margin-bottom: 2rem;
             font-weight: 300;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
 
         .strategy-statement {
             max-width: 800px;
             margin: 0 auto;
             font-size: 1.1rem;
-            color: #ccc;
+            color: #eee;
             line-height: 1.8;
             padding: 2rem;
-            background: rgba(247, 147, 26, 0.05);
+            background: rgba(0, 0, 0, 0.6);
             border-left: 3px solid #f7931a;
             border-radius: 4px;
+            backdrop-filter: blur(10px);
         }
 
         .metrics {
@@ -401,7 +410,7 @@
 
     <div class="metrics">
         <div class="metric">
-            <div class="metric-value" id="totalHoldings">100</div>
+            <div class="metric-value" id="totalHoldings">—</div>
             <div class="metric-label">Total Holdings</div>
         </div>
         <div class="metric">
@@ -409,8 +418,8 @@
             <div class="metric-label">Collections</div>
         </div>
         <div class="metric">
-            <div class="metric-value" id="avgPrice">—</div>
-            <div class="metric-label">Avg. Acquisition</div>
+            <div class="metric-value" id="displayCount">—</div>
+            <div class="metric-label">Displayed</div>
         </div>
         <div class="metric">
             <div class="metric-value">100%</div>
@@ -501,7 +510,9 @@
                 allBeasts = data.assets || [];
                 filteredBeasts = allBeasts;
                 
-                document.getElementById('totalHoldings').textContent = allBeasts.length;
+                // Update metrics
+                document.getElementById('totalHoldings').textContent = allBeasts.length.toLocaleString();
+                document.getElementById('displayCount').textContent = allBeasts.length.toLocaleString();
                 
                 if (allBeasts.length === 0) {
                     gallery.innerHTML = '<div class="error">No holdings found</div>';
@@ -519,6 +530,9 @@
                 gallery.innerHTML = '<div class="error">No assets match your search</div>';
                 return;
             }
+
+            // Update displayed count
+            document.getElementById('displayCount').textContent = beasts.length.toLocaleString();
 
             gallery.innerHTML = beasts.map(beast => {
                 const tokenId = beast.tokenId || 'Unknown';
