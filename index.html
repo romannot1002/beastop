@@ -73,7 +73,7 @@
 
         .metrics {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 2rem;
             padding: 3rem 2rem;
             max-width: 1200px;
@@ -89,6 +89,7 @@
             border-radius: 8px;
             border: 1px solid rgba(247, 147, 26, 0.1);
             transition: all 0.3s;
+            position: relative;
         }
 
         .metric:hover {
@@ -110,6 +111,30 @@
             color: #888;
             text-transform: uppercase;
             letter-spacing: 1px;
+        }
+
+        .live-indicator {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            width: 8px;
+            height: 8px;
+            background: #00ff00;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .last-updated {
+            text-align: center;
+            padding: 1rem;
+            color: #666;
+            font-size: 0.85rem;
+            background: #0a0a0a;
         }
 
         .section-header {
@@ -410,6 +435,7 @@
 
     <div class="metrics">
         <div class="metric">
+            <div class="live-indicator"></div>
             <div class="metric-value" id="totalHoldings">—</div>
             <div class="metric-label">Total Holdings</div>
         </div>
@@ -421,10 +447,10 @@
             <div class="metric-value" id="displayCount">—</div>
             <div class="metric-label">Displayed</div>
         </div>
-        <div class="metric">
-            <div class="metric-value">100%</div>
-            <div class="metric-label">Cold Storage</div>
-        </div>
+    </div>
+
+    <div class="last-updated" id="lastUpdated">
+        Loading...
     </div>
 
     <div class="treasury-info">
@@ -432,10 +458,6 @@
             <div class="treasury-item">
                 <h3>Strategy</h3>
                 <p>Systematic accumulation of rare digital assets with proven provenance and cultural significance in the NFT ecosystem.</p>
-            </div>
-            <div class="treasury-item">
-                <h3>Custody</h3>
-                <p>All assets held in secure cold storage with institutional-grade security protocols and multi-signature verification.</p>
             </div>
             <div class="treasury-item">
                 <h3>Treasury Address</h3>
@@ -484,15 +506,30 @@
         let allBeasts = [];
         let filteredBeasts = [];
         let currentView = 'grid';
+        let autoRefreshInterval;
+        const REFRESH_INTERVAL = 60000; // 60 seconds
 
         const gallery = document.getElementById('gallery');
         const searchInput = document.getElementById('searchInput');
         const gridViewBtn = document.getElementById('gridViewBtn');
         const listViewBtn = document.getElementById('listViewBtn');
         const refreshBtn = document.getElementById('refreshBtn');
+        const lastUpdated = document.getElementById('lastUpdated');
 
-        async function loadAllBeasts() {
-            gallery.innerHTML = '<div class="loading">Loading treasury holdings</div>';
+        function updateTimestamp() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            lastUpdated.textContent = `Last updated: ${timeString} • Auto-refresh every 60s`;
+        }
+
+        async function loadAllBeasts(silent = false) {
+            if (!silent) {
+                gallery.innerHTML = '<div class="loading">Loading treasury holdings</div>';
+            }
 
             try {
                 const response = await fetch('/.netlify/functions/fetch-nfts');
@@ -507,22 +544,76 @@
                     throw new Error(data.error);
                 }
 
+                const previousCount = allBeasts.length;
                 allBeasts = data.assets || [];
                 filteredBeasts = allBeasts;
                 
-                // Update metrics
-                document.getElementById('totalHoldings').textContent = allBeasts.length.toLocaleString();
-                document.getElementById('displayCount').textContent = allBeasts.length.toLocaleString();
+                // Update metrics with animation
+                updateMetric('totalHoldings', allBeasts.length, previousCount);
+                updateMetric('displayCount', allBeasts.length, previousCount);
+                
+                // Update timestamp
+                updateTimestamp();
                 
                 if (allBeasts.length === 0) {
                     gallery.innerHTML = '<div class="error">No holdings found</div>';
                 } else {
-                    displayBeasts(allBeasts);
+                    // Re-apply search filter if exists
+                    if (searchInput.value) {
+                        searchInput.dispatchEvent(new Event('input'));
+                    } else {
+                        displayBeasts(allBeasts);
+                    }
                 }
+
+                // Show notification if count changed
+                if (silent && previousCount > 0 && previousCount !== allBeasts.length) {
+                    showNotification(allBeasts.length - previousCount);
+                }
+
             } catch (error) {
                 console.error('Error loading holdings:', error);
-                gallery.innerHTML = `<div class="error">Error loading treasury: ${error.message}</div>`;
+                if (!silent) {
+                    gallery.innerHTML = `<div class="error">Error loading treasury: ${error.message}</div>`;
+                }
             }
+        }
+
+        function updateMetric(elementId, newValue, oldValue) {
+            const element = document.getElementById(elementId);
+            const formatted = newValue.toLocaleString();
+            
+            if (oldValue !== newValue && oldValue > 0) {
+                element.style.color = newValue > oldValue ? '#00ff00' : '#ff6b35';
+                setTimeout(() => {
+                    element.style.color = '#f7931a';
+                }, 2000);
+            }
+            
+            element.textContent = formatted;
+        }
+
+        function showNotification(change) {
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 1.5rem;
+                background: ${change > 0 ? '#00ff00' : '#ff6b35'};
+                color: #000;
+                border-radius: 8px;
+                font-weight: 600;
+                z-index: 1000;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = `Holdings ${change > 0 ? 'increased' : 'decreased'} by ${Math.abs(change)}`;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
         }
 
         function displayBeasts(beasts) {
@@ -587,10 +678,37 @@
 
         refreshBtn.addEventListener('click', () => {
             searchInput.value = '';
-            loadAllBeasts();
+            loadAllBeasts(false);
+            // Reset auto-refresh timer
+            clearInterval(autoRefreshInterval);
+            startAutoRefresh();
         });
 
-        loadAllBeasts();
+        function startAutoRefresh() {
+            autoRefreshInterval = setInterval(() => {
+                loadAllBeasts(true); // Silent refresh
+            }, REFRESH_INTERVAL);
+        }
+
+        // Initial load
+        loadAllBeasts(false);
+        
+        // Start auto-refresh
+        startAutoRefresh();
+
+        // Add CSS animations
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(400px); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(400px); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
     </script>
 </body>
 </html>
