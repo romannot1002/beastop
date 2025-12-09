@@ -1,7 +1,6 @@
 const fetch = require('node-fetch');
 
 exports.handler = async function(event, context) {
-  // Enable CORS
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
@@ -9,7 +8,6 @@ exports.handler = async function(event, context) {
     'Content-Type': 'application/json'
   };
 
-  // Handle preflight requests
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers, body: '' };
   }
@@ -18,34 +16,47 @@ exports.handler = async function(event, context) {
   const contract = '0xd539a3a5edb713e6587e559a9d007ffff92bd9ab';
   const { offset = '0', limit = '50' } = event.queryStringParameters || {};
 
-  console.log('Fetching NFTs - offset:', offset, 'limit:', limit);
+  console.log('Fetching NFTs via Reservoir API - offset:', offset, 'limit:', limit);
 
   try {
-    const apiUrl = `https://api.opensea.io/api/v1/assets?owner=${wallet}&asset_contract_address=${contract}&limit=${limit}&offset=${offset}`;
+    // Use Reservoir API instead of OpenSea
+    const continuation = offset > 0 ? `&continuation=${offset}` : '';
+    const apiUrl = `https://api.reservoir.tools/users/${wallet}/tokens/v7?collection=${contract}&limit=${limit}${continuation}`;
     
     const response = await fetch(apiUrl, {
       method: 'GET',
       headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        'Accept': 'application/json'
       }
     });
 
     if (!response.ok) {
-      throw new Error(`OpenSea API returned ${response.status}`);
+      throw new Error(`Reservoir API returned ${response.status}`);
     }
 
     const data = await response.json();
-    console.log('Successfully fetched assets:', data.assets ? data.assets.length : 0);
+    console.log('Successfully fetched tokens:', data.tokens ? data.tokens.length : 0);
+
+    // Transform Reservoir format to OpenSea-like format
+    const transformedData = {
+      assets: data.tokens ? data.tokens.map(item => ({
+        token_id: item.token.tokenId,
+        name: item.token.name || `PixelBeast #${item.token.tokenId}`,
+        image_url: item.token.image,
+        image_preview_url: item.token.image,
+        image_thumbnail_url: item.token.image,
+        permalink: `https://opensea.io/assets/ethereum/${contract}/${item.token.tokenId}`
+      })) : []
+    };
 
     return {
       statusCode: 200,
       headers,
-      body: JSON.stringify(data)
+      body: JSON.stringify(transformedData)
     };
 
   } catch (error) {
-    console.error('Error fetching from OpenSea:', error.message);
+    console.error('Error fetching from Reservoir:', error.message);
     
     return {
       statusCode: 500,
