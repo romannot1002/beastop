@@ -1,28 +1,3 @@
-Great question! Here's the reality about hosting on GitHub Pages:
-
-## 🔍 Why GitHub Pages Helps (But May Not Be Enough)
-
-When you open HTML as a **file://** (double-clicking), browsers block *everything* external. When hosted on **https://** (GitHub Pages), CORS proxies *might* work, but OpenSea's API is still protected.
-
-## ✅ Best Solution: Add a Serverless Backend
-
-I'll give you a **GitHub Pages + Serverless Function** setup that will **definitely work**:
-
-### **Step 1: Create This File Structure**
-
-```
-your-repo/
-├── index.html          (frontend - your Beast Reserve page)
-├── netlify.json        (configuration)
-└── netlify/functions/
-    └── fetch-nfts.js   (backend proxy)
-```
-
-### **Step 2: Full Working Code**
-
-**`index.html`** (Complete working frontend):
-
-```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -588,11 +563,6 @@ your-repo/
         let allBeasts = [];
         let currentSort = 'id-asc';
 
-        // Detect if running on Netlify with functions
-        const API_BASE = window.location.hostname.includes('netlify') 
-            ? '/.netlify/functions/fetch-nfts'
-            : `https://api.allorigins.win/raw?url=${encodeURIComponent('https://api.opensea.io/api/v1/assets')}`;
-
         function toggleTheme() {
             const body = document.body;
             const btn = document.querySelector('.theme-toggle');
@@ -608,8 +578,7 @@ your-repo/
         }
 
         function loadTheme() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'light') {
+            if (localStorage.getItem('theme') === 'light') {
                 document.body.setAttribute('data-theme', 'light');
                 document.querySelector('.theme-toggle').textContent = '🌙 DARK MODE';
             }
@@ -617,57 +586,95 @@ your-repo/
 
         async function loadAllBeasts() {
             const gallery = document.getElementById('gallery');
-            
-            try {
-                // Use serverless function if on Netlify, otherwise CORS proxy
-                const useNetlify = window.location.hostname.includes('netlify');
-                let offset = 0;
-                const limit = 50;
+            console.log('Starting to load beasts...');
 
-                while (true) {
-                    let url;
-                    if (useNetlify) {
-                        url = `/.netlify/functions/fetch-nfts?offset=${offset}&limit=${limit}`;
-                    } else {
+            // Try multiple CORS proxies in sequence
+            const proxies = [
+                'https://api.allorigins.win/raw?url=',
+                'https://corsproxy.io/?',
+            ];
+
+            for (let proxyIndex = 0; proxyIndex < proxies.length; proxyIndex++) {
+                try {
+                    const proxy = proxies[proxyIndex];
+                    console.log(`Trying proxy ${proxyIndex + 1}:`, proxy);
+                    
+                    let offset = 0;
+                    const limit = 50;
+                    let totalLoaded = 0;
+
+                    while (totalLoaded < 200) { // Safety limit
                         const apiUrl = `https://api.opensea.io/api/v1/assets?owner=${wallet}&asset_contract_address=${contract}&limit=${limit}&offset=${offset}`;
-                        url = `https://api.allorigins.win/raw?url=${encodeURIComponent(apiUrl)}`;
-                    }
+                        const proxyUrl = proxy + encodeURIComponent(apiUrl);
 
-                    const response = await fetch(url);
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    
-                    const data = await response.json();
-                    
-                    if (data.assets && data.assets.length > 0) {
-                        allBeasts = allBeasts.concat(data.assets);
-                        gallery.innerHTML = `<div class="loading">Loaded ${allBeasts.length} PixelBeasts</div>`;
+                        console.log(`Fetching batch at offset ${offset}...`);
                         
-                        if (data.assets.length < limit) break;
-                        offset += limit;
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    } else {
-                        break;
+                        const response = await fetch(proxyUrl);
+                        
+                        if (!response.ok) {
+                            console.error(`HTTP ${response.status}`);
+                            throw new Error(`HTTP ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        console.log('Response data:', data);
+
+                        if (data.assets && data.assets.length > 0) {
+                            allBeasts = allBeasts.concat(data.assets);
+                            totalLoaded += data.assets.length;
+                            gallery.innerHTML = `<div class="loading">Loaded ${allBeasts.length} PixelBeasts</div>`;
+                            console.log(`Loaded ${data.assets.length} beasts (total: ${allBeasts.length})`);
+
+                            if (data.assets.length < limit) {
+                                console.log('Reached end of collection');
+                                break;
+                            }
+
+                            offset += limit;
+                            await new Promise(resolve => setTimeout(resolve, 800));
+                        } else {
+                            console.log('No assets in response');
+                            break;
+                        }
                     }
+
+                    if (allBeasts.length > 0) {
+                        console.log(`✅ Successfully loaded ${allBeasts.length} beasts!`);
+                        allBeasts.sort((a, b) => parseInt(a.token_id) - parseInt(b.token_id));
+                        renderBeasts(allBeasts);
+                        return; // Success! Exit function
+                    }
+
+                } catch (error) {
+                    console.error(`Proxy ${proxyIndex + 1} failed:`, error);
+                    // Continue to next proxy
                 }
-
-                allBeasts.sort((a, b) => parseInt(a.token_id) - parseInt(b.token_id));
-                renderBeasts(allBeasts);
-
-            } catch (error) {
-                console.error('Error:', error);
-                gallery.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: var(--text-secondary);">
-                        <h3 style="color: #ff6b6b; margin-bottom: 20px;">Unable to load NFTs</h3>
-                        <p>API access restricted. View collection on OpenSea:</p>
-                        <a href="https://opensea.io/0x39c71cbcb08af17187f643701655bfd6db467dc7?search[collections][0]=pixelbeasts-beastopia" 
-                           target="_blank" 
-                           class="creator-link" 
-                           style="font-size: 1.2rem; margin-top: 20px;">
-                            VIEW ON OPENSEA →
-                        </a>
-                    </div>
-                `;
             }
+
+            // All proxies failed - show fallback
+            console.error('All loading methods failed');
+            showFallback();
+        }
+
+        function showFallback() {
+            const gallery = document.getElementById('gallery');
+            gallery.innerHTML = `
+                <div style="grid-column: 1/-1; text-align: center; padding: 60px; color: var(--text-secondary);">
+                    <h3 style="color: #ff6b6b; margin-bottom: 20px; font-size: 1.5rem;">⚠️ Unable to Load NFT Data</h3>
+                    <p style="margin: 20px 0; font-size: 1.1rem;">The OpenSea API is currently blocked due to CORS restrictions.</p>
+                    <p style="margin: 20px 0;">View the full Beast Reserve collection directly on OpenSea:</p>
+                    <a href="https://opensea.io/0x39c71cbcb08af17187f643701655bfd6db467dc7?search[collections][0]=pixelbeasts-beastopia" 
+                       target="_blank" 
+                       class="creator-link" 
+                       style="font-size: 1.3rem; margin-top: 30px; display: inline-block;">
+                        VIEW ALL 163 BEASTS ON OPENSEA →
+                    </a>
+                    <p style="margin-top: 60px; font-size: 0.9rem; color: var(--text-tertiary);">
+                        <strong>Technical Note:</strong> OpenSea's API requires server-side access.<br>
+                        For a fully working version, contact your developer to set up a backend proxy.
+                    </p>
+                </div>
+            `;
         }
 
         function renderBeasts(beasts) {
@@ -677,16 +684,24 @@ your-repo/
             beasts.forEach(beast => {
                 const card = document.createElement('div');
                 card.className = 'nft-card';
-                const imageUrl = beast.image_url || beast.image_preview_url || `https://via.placeholder.com/400x400/1a1a1a/00ff00?text=${beast.token_id}`;
+                
+                const imageUrl = beast.image_url || beast.image_preview_url || beast.image_thumbnail_url || 
+                                `https://via.placeholder.com/400x400/1a1a1a/00ff00?text=Beast+${beast.token_id}`;
+                const name = beast.name || `PixelBeast #${beast.token_id}`;
                 const permalink = beast.permalink || `https://opensea.io/assets/ethereum/${contract}/${beast.token_id}`;
                 
                 card.innerHTML = `
-                    <img src="${imageUrl}" alt="PixelBeast #${beast.token_id}" class="nft-image" loading="lazy">
+                    <img src="${imageUrl}" 
+                         alt="${name}" 
+                         class="nft-image" 
+                         loading="lazy" 
+                         onerror="this.src='https://via.placeholder.com/400x400/1a1a1a/00ff00?text=PixelBeast+${beast.token_id}'">
                     <div class="nft-info">
                         <div class="nft-title">#${beast.token_id}</div>
-                        <div class="nft-id">${beast.name || 'PixelBeast'}</div>
+                        <div class="nft-id">${name}</div>
                     </div>
                 `;
+                
                 card.onclick = () => window.open(permalink, '_blank');
                 gallery.appendChild(card);
             });
@@ -695,25 +710,39 @@ your-repo/
         function sortBeasts(method) {
             if (!allBeasts.length) return;
             currentSort = method;
+            
             document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
             document.getElementById(`sort-${method}`).classList.add('active');
             
             let sorted = [...allBeasts];
-            if (method === 'id-asc') sorted.sort((a, b) => parseInt(a.token_id) - parseInt(b.token_id));
-            else if (method === 'id-desc') sorted.sort((a, b) => parseInt(b.token_id) - parseInt(a.token_id));
-            else sorted.sort(() => Math.random() - 0.5);
+            
+            if (method === 'id-asc') {
+                sorted.sort((a, b) => parseInt(a.token_id) - parseInt(b.token_id));
+            } else if (method === 'id-desc') {
+                sorted.sort((a, b) => parseInt(b.token_id) - parseInt(a.token_id));
+            } else {
+                sorted.sort(() => Math.random() - 0.5);
+            }
             
             renderBeasts(sorted);
         }
 
         function filterBeasts() {
             if (!allBeasts.length) return;
-            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-            let filtered = searchTerm ? allBeasts.filter(b => b.token_id.toString().includes(searchTerm)) : allBeasts;
             
-            if (currentSort === 'id-desc') filtered.sort((a, b) => parseInt(b.token_id) - parseInt(a.token_id));
-            else if (currentSort === 'random') filtered.sort(() => Math.random() - 0.5);
-            else filtered.sort((a, b) => parseInt(a.token_id) - parseInt(b.token_id));
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            let filtered = searchTerm ? 
+                allBeasts.filter(b => b.token_id.toString().includes(searchTerm) || 
+                                     (b.name || '').toLowerCase().includes(searchTerm)) : 
+                allBeasts;
+            
+            if (currentSort === 'id-desc') {
+                filtered.sort((a, b) => parseInt(b.token_id) - parseInt(a.token_id));
+            } else if (currentSort === 'random') {
+                filtered.sort(() => Math.random() - 0.5);
+            } else {
+                filtered.sort((a, b) => parseInt(a.token_id) - parseInt(b.token_id));
+            }
             
             renderBeasts(filtered);
         }
@@ -725,70 +754,3 @@ your-repo/
     </script>
 </body>
 </html>
-```
-
-**`netlify.json`**:
-```json
-{
-  "functions": {
-    "directory": "netlify/functions"
-  }
-}
-```
-
-**`netlify/functions/fetch-nfts.js`** (Serverless backend):
-```javascript
-const fetch = require('node-fetch');
-
-exports.handler = async function(event, context) {
-  const wallet = '0x39c71cbcb08af17187f643701655bfd6db467dc7';
-  const contract = '0xd539a3a5edb713e6587e559a9d007ffff92bd9ab';
-  const { offset = 0, limit = 50 } = event.queryStringParameters;
-
-  try {
-    const apiUrl = `https://api.opensea.io/api/v1/assets?owner=${wallet}&asset_contract_address=${contract}&limit=${limit}&offset=${offset}`;
-    
-    const response = await fetch(apiUrl, {
-      headers: {
-        'Accept': 'application/json',
-        'User-Agent': 'Beast-Reserve/1.0'
-      }
-    });
-
-    const data = await response.json();
-
-    return {
-      statusCode: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*'
-      },
-      body: JSON.stringify(data)
-    };
-  } catch (error) {
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: error.message })
-    };
-  }
-};
-```
-
-## 🚀 Deployment Steps:
-
-### **Deploy to Netlify (100% Working Solution)**
-
-1. Go to https://app.netlify.com/drop
-2. Create the 3 files above in a folder
-3. Drag the entire folder to Netlify Drop
-4. Get your live URL like `https://your-site.netlify.app`
-
-**This WILL work** because the serverless function bypasses CORS!
-
-### **Or Use GitHub + Netlify:**
-
-1. Push code to GitHub
-2. Connect repo to Netlify
-3. Netlify auto-detects and builds it
-
-The serverless function acts as your own private API proxy that OpenSea can't block! 🎉
