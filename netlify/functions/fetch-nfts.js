@@ -31,7 +31,7 @@ exports.handler = async function(event, context) {
         let allNFTs = [];
         let pageKey = undefined;
         let pageCount = 0;
-        const maxPages = 20; // Increased safety limit
+        const maxPages = 20;
 
         console.log('Starting NFT fetch for wallet:', walletAddress);
 
@@ -56,64 +56,85 @@ exports.handler = async function(event, context) {
             const nftsInPage = data.ownedNfts || [];
             allNFTs = allNFTs.concat(nftsInPage);
             
-            console.log(`Page ${pageCount + 1}: Found ${nftsInPage.length} NFTs. Total so far: ${allNFTs.length}`);
-            console.log(`Next pageKey: ${data.pageKey ? 'exists' : 'none (last page)'}`);
+            console.log(`Page ${pageCount + 1}: Found ${nftsInPage.length} NFTs. Total: ${allNFTs.length}`);
             
             pageKey = data.pageKey;
             pageCount++;
             
         } while (pageKey && pageCount < maxPages);
 
-        console.log(`✅ Total NFTs fetched across ${pageCount} pages: ${allNFTs.length}`);
+        console.log(`✅ Total NFTs fetched: ${allNFTs.length}`);
 
-        // Filter for PixelBeasts and format
+        // Filter and format PixelBeasts
         const beasts = allNFTs
-            .filter(nft => {
-                const contractAddr = nft.contract.address.toLowerCase();
-                const isPixelBeast = pixelbeastContracts.includes(contractAddr);
-                return isPixelBeast;
-            })
+            .filter(nft => pixelbeastContracts.includes(nft.contract.address.toLowerCase()))
             .map(nft => {
                 const tokenId = nft.tokenId;
-                // Use the ACTUAL contract address from the NFT
                 const contractAddress = nft.contract.address;
                 
-                console.log(`Processing Beast #${tokenId} from contract ${contractAddress}`);
+                // Try multiple image sources in order of preference
+                let imageUrl = null;
+                let imageSource = 'none';
                 
-                // ONLY use Alchemy's cached/thumbnail URLs
-                let imageUrl = nft.image?.cachedUrl || nft.image?.thumbnailUrl;
-                
-                // Skip Google Storage URLs
-                if (imageUrl && imageUrl.includes('storage.googleapis.com')) {
-                    imageUrl = null;
+                // Priority 1: Alchemy cached URL
+                if (nft.image?.cachedUrl && !nft.image.cachedUrl.includes('storage.googleapis.com')) {
+                    imageUrl = nft.image.cachedUrl;
+                    imageSource = 'cached';
                 }
                 
-                // SVG fallback
-                if (!imageUrl) {
-                    const svg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Crect width='300' height='300' fill='%231a1a1a'/%3E%3Ctext x='50%25' y='45%25' font-family='monospace' font-size='20' fill='%23f7931a' text-anchor='middle'%3EAsset%3C/text%3E%3Ctext x='50%25' y='55%25' font-family='monospace' font-size='24' fill='%23f7931a' text-anchor='middle'%3E%23${tokenId}%3C/text%3E%3C/svg%3E`;
-                    imageUrl = svg;
+                // Priority 2: Alchemy thumbnail
+                if (!imageUrl && nft.image?.thumbnailUrl && !nft.image.thumbnailUrl.includes('storage.googleapis.com')) {
+                    imageUrl = nft.image.thumbnailUrl;
+                    imageSource = 'thumbnail';
                 }
+                
+                // Priority 3: IPFS gateway (if available)
+                if (!imageUrl && nft.image?.originalUrl) {
+                    const originalUrl = nft.image.originalUrl;
+                    if (originalUrl.startsWith('ipfs://')) {
+                        const ipfsHash = originalUrl.replace('ipfs://', '');
+                        imageUrl = `https://ipfs.io/ipfs/${ipfsHash}`;
+                        imageSource = 'ipfs';
+                    }
+                }
+                
+                // Priority 4: OpenSea proxy (try to use their CDN)
+                if (!imageUrl && nft.image?.originalUrl) {
+                    const originalUrl = nft.image.originalUrl;
+                    if (originalUrl.includes('storage.googleapis.com')) {
+                        // OpenSea sometimes serves these through their CDN
+                        imageUrl = `https://i.seadn.io/s/raw/files/${tokenId}.png`;
+                        imageSource = 'opensea-cdn';
+                    }
+                }
+                
+                // Get attributes for better placeholder
+                const attributes = nft.raw?.metadata?.attributes || [];
+                const backgroundColor = attributes.find(a => a.trait_type === 'Background')?.value || '#1a1a1a';
+                
+                console.log(`Beast #${tokenId}: Image source = ${imageSource}, URL = ${imageUrl ? imageUrl.substring(0, 50) + '...' : 'none'}`);
                 
                 return {
                     tokenId: tokenId,
                     name: nft.name || nft.raw?.metadata?.name || `PixelBeast #${tokenId}`,
                     image: imageUrl,
+                    imageSource: imageSource,
                     description: nft.description || '',
                     contractAddress: contractAddress,
-                    // Fixed OpenSea URL format
+                    attributes: attributes,
+                    backgroundColor: backgroundColor,
                     openseaUrl: `https://opensea.io/assets/ethereum/${contractAddress}/${tokenId}`
                 };
             });
 
         console.log(`✅ Returning ${beasts.length} PixelBeasts`);
-
-        // Log first few OpenSea URLs to verify
-        if (beasts.length > 0) {
-            console.log('Sample OpenSea URLs:');
-            beasts.slice(0, 3).forEach(b => {
-                console.log(`  Beast #${b.tokenId}: ${b.openseaUrl}`);
-            });
-        }
+        
+        // Log image source statistics
+        const sourceStats = beasts.reduce((acc, b) => {
+            acc[b.imageSource] = (acc[b.imageSource] || 0) + 1;
+            return acc;
+        }, {});
+        console.log('Image sources:', sourceStats);
 
         return {
             statusCode: 200,
@@ -121,19 +142,18 @@ exports.handler = async function(event, context) {
             body: JSON.stringify({
                 assets: beasts,
                 total: beasts.length,
-                pagesScanned: pageCount
+                pagesScanned: pageCount,
+                imageStats: sourceStats
             })
         };
 
     } catch (error) {
         console.error('❌ Error:', error.message);
-        console.error('Stack:', error.stack);
         return {
             statusCode: 500,
             headers,
             body: JSON.stringify({ 
-                error: error.message,
-                stack: error.stack 
+                error: error.message
             })
         };
     }
