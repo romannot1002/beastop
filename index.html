@@ -72,9 +72,8 @@
         }
 
         .metrics {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
+            display: flex;
+            justify-content: center;
             padding: 3rem 2rem;
             max-width: 1200px;
             margin: 0 auto;
@@ -84,12 +83,13 @@
 
         .metric {
             text-align: center;
-            padding: 2rem 1rem;
+            padding: 2rem 4rem;
             background: rgba(247, 147, 26, 0.03);
             border-radius: 8px;
             border: 1px solid rgba(247, 147, 26, 0.1);
             transition: all 0.3s;
             position: relative;
+            min-width: 300px;
         }
 
         .metric:hover {
@@ -99,7 +99,7 @@
         }
 
         .metric-value {
-            font-size: 3rem;
+            font-size: 4rem;
             font-weight: 700;
             color: #f7931a;
             margin-bottom: 0.5rem;
@@ -107,18 +107,18 @@
         }
 
         .metric-label {
-            font-size: 0.9rem;
+            font-size: 1rem;
             color: #888;
             text-transform: uppercase;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
 
         .live-indicator {
             position: absolute;
-            top: 1rem;
-            right: 1rem;
-            width: 8px;
-            height: 8px;
+            top: 1.5rem;
+            right: 1.5rem;
+            width: 10px;
+            height: 10px;
             background: #00ff00;
             border-radius: 50%;
             animation: pulse 2s infinite;
@@ -413,12 +413,13 @@
                 padding: 1rem;
             }
 
-            .metrics {
-                grid-template-columns: repeat(2, 1fr);
+            .metric {
+                min-width: auto;
+                padding: 2rem 2rem;
             }
 
             .metric-value {
-                font-size: 2rem;
+                font-size: 2.5rem;
             }
         }
     </style>
@@ -438,14 +439,6 @@
             <div class="live-indicator"></div>
             <div class="metric-value" id="totalHoldings">—</div>
             <div class="metric-label">Total Holdings</div>
-        </div>
-        <div class="metric">
-            <div class="metric-value">2</div>
-            <div class="metric-label">Collections</div>
-        </div>
-        <div class="metric">
-            <div class="metric-value" id="displayCount">—</div>
-            <div class="metric-label">Displayed</div>
         </div>
     </div>
 
@@ -548,9 +541,8 @@
                 allBeasts = data.assets || [];
                 filteredBeasts = allBeasts;
                 
-                // Update metrics with animation
+                // Update metric with animation
                 updateMetric('totalHoldings', allBeasts.length, previousCount);
-                updateMetric('displayCount', allBeasts.length, previousCount);
                 
                 // Update timestamp
                 updateTimestamp();
@@ -621,9 +613,6 @@
                 gallery.innerHTML = '<div class="error">No assets match your search</div>';
                 return;
             }
-
-            // Update displayed count
-            document.getElementById('displayCount').textContent = beasts.length.toLocaleString();
 
             gallery.innerHTML = beasts.map(beast => {
                 const tokenId = beast.tokenId || 'Unknown';
