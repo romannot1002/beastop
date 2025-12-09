@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Beast Reserve - PixelBeasts Collection</title>
+    <title>Strategic PixelBeast Reserve | Digital Asset Treasury</title>
     <style>
         * {
             margin: 0;
@@ -12,83 +12,123 @@
         }
 
         body {
-            font-family: 'Courier New', monospace;
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
-            color: #00ff41;
-            min-height: 100vh;
-        }
-
-        header {
-            text-align: center;
-            padding: 3rem 2rem;
-            background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0.85)), 
-                        url('https://i.imgur.com/Lsw5VPt.jpeg') center center / cover;
-            border-bottom: 2px solid #00ff41;
-            position: relative;
-            min-height: 300px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-        }
-
-        h1 {
-            font-size: 3rem;
-            margin-bottom: 0.5rem;
-            text-shadow: 0 0 10px #00ff41;
-            letter-spacing: 2px;
-        }
-
-        .subtitle {
-            font-size: 1.2rem;
-            color: #00cc33;
-            margin-bottom: 1rem;
-        }
-
-        .collection-name {
-            font-size: 1.5rem;
-            color: #00ff41;
-            margin: 1rem 0;
-            font-weight: bold;
-        }
-
-        .description {
-            font-size: 0.9rem;
-            color: #00aa22;
-            max-width: 800px;
-            margin: 1rem auto;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: #000;
+            color: #fff;
             line-height: 1.6;
         }
 
-        .wallet-address {
-            font-size: 0.8rem;
-            color: #008822;
-            margin-top: 1rem;
-            word-break: break-all;
-            padding: 0.5rem;
-            background: rgba(0, 255, 65, 0.1);
-            border-radius: 4px;
-            display: inline-block;
+        .hero {
+            background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 100%);
+            padding: 4rem 2rem 3rem;
+            text-align: center;
+            border-bottom: 1px solid #333;
         }
 
-        .image-notice {
-            background: rgba(255, 165, 0, 0.1);
-            border: 1px solid #ffa500;
-            color: #ffa500;
-            padding: 1rem;
-            margin: 1rem 2rem;
-            border-radius: 4px;
-            text-align: center;
+        .logo {
             font-size: 0.9rem;
+            letter-spacing: 3px;
+            color: #888;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #f7931a 0%, #ff6b35 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            color: #999;
+            margin-bottom: 2rem;
+            font-weight: 300;
+        }
+
+        .strategy-statement {
+            max-width: 800px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+            color: #ccc;
+            line-height: 1.8;
+            padding: 2rem;
+            background: rgba(247, 147, 26, 0.05);
+            border-left: 3px solid #f7931a;
+            border-radius: 4px;
+        }
+
+        .metrics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            padding: 3rem 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #0a0a0a;
+            border-bottom: 1px solid #333;
+        }
+
+        .metric {
+            text-align: center;
+            padding: 2rem 1rem;
+            background: rgba(247, 147, 26, 0.03);
+            border-radius: 8px;
+            border: 1px solid rgba(247, 147, 26, 0.1);
+            transition: all 0.3s;
+        }
+
+        .metric:hover {
+            background: rgba(247, 147, 26, 0.08);
+            border-color: rgba(247, 147, 26, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .metric-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: #f7931a;
+            margin-bottom: 0.5rem;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-header {
+            padding: 3rem 2rem 2rem;
+            text-align: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: #fff;
+        }
+
+        .section-header p {
+            color: #888;
+            font-size: 1rem;
         }
 
         .controls {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 2rem;
+            gap: 1rem;
             padding: 2rem;
             flex-wrap: wrap;
-            background: rgba(26, 26, 26, 0.8);
+            background: #0a0a0a;
         }
 
         .search-box {
@@ -98,171 +138,164 @@
 
         input[type="text"] {
             width: 100%;
-            padding: 0.8rem;
-            background: rgba(0, 0, 0, 0.5);
-            border: 1px solid #00ff41;
-            color: #00ff41;
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            border-radius: 4px;
+            padding: 0.9rem 1.2rem;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.95rem;
+            border-radius: 6px;
             transition: all 0.3s;
         }
 
         input[type="text"]:focus {
             outline: none;
-            box-shadow: 0 0 10px #00ff41;
-            background: rgba(0, 0, 0, 0.7);
+            border-color: #f7931a;
+            background: #0a0a0a;
         }
 
         input[type="text"]::placeholder {
-            color: #006622;
+            color: #555;
         }
 
         .view-controls {
             display: flex;
-            gap: 1rem;
-            align-items: center;
+            gap: 0.5rem;
         }
 
         button {
-            background: rgba(0, 255, 65, 0.1);
-            border: 1px solid #00ff41;
-            color: #00ff41;
-            padding: 0.8rem 1.5rem;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            color: #fff;
+            padding: 0.9rem 1.5rem;
             cursor: pointer;
-            font-family: 'Courier New', monospace;
-            font-size: 1rem;
-            border-radius: 4px;
+            font-family: inherit;
+            font-size: 0.9rem;
+            border-radius: 6px;
             transition: all 0.3s;
+            font-weight: 500;
         }
 
         button:hover {
-            background: rgba(0, 255, 65, 0.2);
-            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
-            transform: translateY(-2px);
+            background: #222;
+            border-color: #f7931a;
         }
 
         button.active {
-            background: #00ff41;
+            background: #f7931a;
             color: #000;
+            border-color: #f7931a;
         }
 
-        .counter {
-            font-size: 1.2rem;
-            color: #00ff41;
-            text-align: center;
-            padding: 1rem;
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .gallery {
+        .holdings-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            gap: 2rem;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
             padding: 2rem;
             max-width: 1400px;
             margin: 0 auto;
         }
 
-        .gallery.list-view {
+        .holdings-grid.list-view {
             grid-template-columns: 1fr;
-            max-width: 800px;
+            max-width: 900px;
         }
 
-        .beast-card {
-            background: rgba(26, 26, 26, 0.8);
-            border: 1px solid #00ff41;
+        .asset-card {
+            background: #1a1a1a;
+            border: 1px solid #2a2a2a;
             border-radius: 8px;
-            padding: 1rem;
+            overflow: hidden;
             transition: all 0.3s;
             cursor: pointer;
         }
 
-        .beast-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.3);
-            border-color: #00ff88;
+        .asset-card:hover {
+            border-color: #f7931a;
+            box-shadow: 0 8px 24px rgba(247, 147, 26, 0.15);
+            transform: translateY(-3px);
         }
 
-        .list-view .beast-card {
+        .list-view .asset-card {
             display: flex;
             gap: 1.5rem;
-            padding: 1.5rem;
         }
 
-        .list-view .beast-card img {
-            width: 150px;
-            height: 150px;
+        .asset-image-wrapper {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1;
+            overflow: hidden;
+            background: #0a0a0a;
+        }
+
+        .list-view .asset-image-wrapper {
+            width: 180px;
             flex-shrink: 0;
         }
 
-        .list-view .beast-info {
-            flex: 1;
-        }
-
-        .beast-image-link {
+        .asset-image-link {
             display: block;
-            text-decoration: none;
-            position: relative;
-        }
-
-        .beast-image-link::after {
-            content: '→ Click to view';
-            position: absolute;
-            bottom: 10px;
-            right: 10px;
-            background: rgba(0, 255, 65, 0.9);
-            color: #000;
-            padding: 0.3rem 0.6rem;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            opacity: 0;
-            transition: opacity 0.3s;
-        }
-
-        .beast-card:hover .beast-image-link::after {
-            opacity: 1;
-        }
-
-        .beast-image {
             width: 100%;
-            aspect-ratio: 1;
+            height: 100%;
+        }
+
+        .asset-image {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border-radius: 4px;
-            margin-bottom: 1rem;
-            background: rgba(0, 0, 0, 0.5);
+            transition: transform 0.3s;
         }
 
-        .beast-name {
+        .asset-card:hover .asset-image {
+            transform: scale(1.05);
+        }
+
+        .asset-info {
+            padding: 1.5rem;
+        }
+
+        .list-view .asset-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .asset-name {
             font-size: 1.1rem;
+            font-weight: 600;
             margin-bottom: 0.5rem;
-            color: #00ff41;
+            color: #fff;
         }
 
-        .beast-id {
-            font-size: 0.9rem;
-            color: #00aa22;
+        .asset-id {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 1rem;
+            font-family: 'Courier New', monospace;
         }
 
-        .beast-link {
-            display: inline-block;
-            margin-top: 0.5rem;
-            color: #00cc33;
+        .view-asset {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #f7931a;
             text-decoration: none;
-            font-size: 0.8rem;
-            transition: color 0.3s;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s;
         }
 
-        .beast-link:hover {
-            color: #00ff41;
-            text-decoration: underline;
+        .view-asset:hover {
+            gap: 0.7rem;
         }
 
         .loading {
             text-align: center;
             padding: 4rem 2rem;
-            font-size: 1.5rem;
-            color: #00ff41;
+            font-size: 1.2rem;
+            color: #666;
         }
 
         .loading::after {
@@ -280,96 +313,162 @@
             text-align: center;
             padding: 2rem;
             color: #ff4444;
-            background: rgba(255, 68, 68, 0.1);
-            border: 1px solid #ff4444;
-            border-radius: 4px;
+            background: rgba(255, 68, 68, 0.05);
+            border: 1px solid rgba(255, 68, 68, 0.2);
+            border-radius: 8px;
             margin: 2rem;
         }
 
-        .status-message {
-            text-align: center;
-            padding: 1rem;
-            margin: 1rem 2rem;
-            border-radius: 4px;
+        .treasury-info {
+            background: #0a0a0a;
+            padding: 3rem 2rem;
+            margin: 3rem 0;
+            border-top: 1px solid #333;
+            border-bottom: 1px solid #333;
+        }
+
+        .treasury-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .treasury-item h3 {
+            color: #f7931a;
             font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .status-message.success {
-            background: rgba(0, 255, 65, 0.1);
-            border: 1px solid #00ff41;
-            color: #00ff41;
-        }
-
-        .status-message.error {
-            background: rgba(255, 68, 68, 0.1);
-            border: 1px solid #ff4444;
-            color: #ff4444;
-        }
-
-        @media (max-width: 768px) {
-            h1 {
-                font-size: 2rem;
-            }
-
-            .gallery {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 1rem;
-                padding: 1rem;
-            }
-
-            .controls {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .search-box {
-                max-width: 100%;
-            }
+        .treasury-item p {
+            color: #aaa;
+            line-height: 1.8;
         }
 
         footer {
             text-align: center;
-            padding: 2rem;
-            margin-top: 3rem;
-            border-top: 1px solid #00ff41;
-            color: #00aa22;
+            padding: 3rem 2rem;
+            border-top: 1px solid #333;
+            color: #666;
             font-size: 0.9rem;
+        }
+
+        .wallet-link {
+            color: #f7931a;
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            word-break: break-all;
+        }
+
+        .wallet-link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+
+            .holdings-grid {
+                grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+                gap: 1rem;
+                padding: 1rem;
+            }
+
+            .metrics {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .metric-value {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
-    <header>
-        <h1>The Beast Reserve</h1>
-        <div class="subtitle">DIGITAL ASSET PORTFOLIO</div>
-        <div class="collection-name">PixelBeasts (Beastopia)</div>
-        <div class="description">
-            Strategic accumulation of 100+ generative pixel art creatures by @yoheinakajima
+    <div class="hero">
+        <div class="logo">STRATEGIC RESERVE</div>
+        <h1>PixelBeast Treasury</h1>
+        <p class="tagline">Systematic Accumulation of Generative Digital Assets</p>
+        <div class="strategy-statement">
+            Strategic acquisition and custody of PixelBeasts (Beastopia) - generative pixel art creatures by @yoheinakajima. Operating under a disciplined accumulation strategy focused on long-term value preservation and digital scarcity.
         </div>
-        <div class="wallet-address">0x39c71cbcb08af17187f643701655bfd6db467dc7</div>
-    </header>
+    </div>
 
-    <div class="image-notice">
-        ℹ️ Image thumbnails shown below. Click any beast to view the full artwork on OpenSea.
+    <div class="metrics">
+        <div class="metric">
+            <div class="metric-value" id="totalHoldings">100</div>
+            <div class="metric-label">Total Holdings</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value">2</div>
+            <div class="metric-label">Collections</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value" id="avgPrice">—</div>
+            <div class="metric-label">Avg. Acquisition</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value">100%</div>
+            <div class="metric-label">Cold Storage</div>
+        </div>
+    </div>
+
+    <div class="treasury-info">
+        <div class="treasury-grid">
+            <div class="treasury-item">
+                <h3>Strategy</h3>
+                <p>Systematic accumulation of rare digital assets with proven provenance and cultural significance in the NFT ecosystem.</p>
+            </div>
+            <div class="treasury-item">
+                <h3>Custody</h3>
+                <p>All assets held in secure cold storage with institutional-grade security protocols and multi-signature verification.</p>
+            </div>
+            <div class="treasury-item">
+                <h3>Treasury Address</h3>
+                <p>
+                    <a href="https://etherscan.io/address/0x39c71cbcb08af17187f643701655bfd6db467dc7" 
+                       target="_blank" 
+                       class="wallet-link">
+                        0x39c71cbcb08af17187f643701655bfd6db467dc7
+                    </a>
+                </p>
+            </div>
+            <div class="treasury-item">
+                <h3>Transparency</h3>
+                <p>Real-time on-chain verification available. All holdings publicly auditable via Ethereum blockchain.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <h2>Treasury Holdings</h2>
+        <p>Complete inventory of PixelBeast digital assets under custody</p>
     </div>
 
     <div class="controls">
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search beasts by name or ID...">
+            <input type="text" id="searchInput" placeholder="Search by asset ID or name...">
         </div>
         <div class="view-controls">
-            <button id="gridViewBtn" class="active">Grid View</button>
-            <button id="listViewBtn">List View</button>
+            <button id="gridViewBtn" class="active">Grid</button>
+            <button id="listViewBtn">List</button>
             <button id="refreshBtn">Refresh</button>
         </div>
     </div>
 
-    <div id="statusMessage"></div>
-    <div id="counter" class="counter"></div>
-    <div id="gallery" class="gallery"></div>
+    <div id="gallery" class="holdings-grid"></div>
 
     <footer>
-        <p>The Beast Reserve © 2024 | PixelBeasts Collection Tracker</p>
-        <p style="margin-top: 0.5rem; font-size: 0.8rem;">Built with ♠ for the horde</p>
+        <p><strong>Strategic PixelBeast Reserve</strong></p>
+        <p style="margin-top: 1rem; color: #444;">Institutional-grade digital asset custody and management</p>
+        <p style="margin-top: 2rem; font-size: 0.8rem;">
+            Contract Address: 0x1acd747b00d65e2e42433f0280e7dcb530de41d7 (PixelBeasts - Beastopia)
+        </p>
     </footer>
 
     <script>
@@ -382,24 +481,9 @@
         const gridViewBtn = document.getElementById('gridViewBtn');
         const listViewBtn = document.getElementById('listViewBtn');
         const refreshBtn = document.getElementById('refreshBtn');
-        const counter = document.getElementById('counter');
-        const statusMessage = document.getElementById('statusMessage');
 
-        // Show status messages
-        function showStatus(message, type = 'success') {
-            statusMessage.textContent = message;
-            statusMessage.className = `status-message ${type}`;
-            statusMessage.style.display = 'block';
-            
-            setTimeout(() => {
-                statusMessage.style.display = 'none';
-            }, 5000);
-        }
-
-        // Load beasts from Netlify function
         async function loadAllBeasts() {
-            gallery.innerHTML = '<div class="loading">Loading your PixelBeasts collection</div>';
-            showStatus('Fetching beasts from the blockchain...');
+            gallery.innerHTML = '<div class="loading">Loading treasury holdings</div>';
 
             try {
                 const response = await fetch('/.netlify/functions/fetch-nfts');
@@ -417,45 +501,43 @@
                 allBeasts = data.assets || [];
                 filteredBeasts = allBeasts;
                 
+                document.getElementById('totalHoldings').textContent = allBeasts.length;
+                
                 if (allBeasts.length === 0) {
-                    gallery.innerHTML = '<div class="error">No beasts found in collection</div>';
-                    showStatus('⚠️ No beasts found', 'error');
+                    gallery.innerHTML = '<div class="error">No holdings found</div>';
                 } else {
                     displayBeasts(allBeasts);
-                    updateCounter();
-                    showStatus(`✅ Successfully loaded ${allBeasts.length} beasts!`, 'success');
                 }
             } catch (error) {
-                console.error('Error loading beasts:', error);
-                gallery.innerHTML = `<div class="error">Error loading beasts: ${error.message}</div>`;
-                showStatus(`⚠️ Error: ${error.message}`, 'error');
+                console.error('Error loading holdings:', error);
+                gallery.innerHTML = `<div class="error">Error loading treasury: ${error.message}</div>`;
             }
         }
 
-        // Display beasts in gallery
         function displayBeasts(beasts) {
             if (beasts.length === 0) {
-                gallery.innerHTML = '<div class="error">No beasts match your search</div>';
+                gallery.innerHTML = '<div class="error">No assets match your search</div>';
                 return;
             }
 
             gallery.innerHTML = beasts.map(beast => {
                 const tokenId = beast.tokenId || 'Unknown';
                 const name = beast.name || `PixelBeast #${tokenId}`;
-                const imageUrl = beast.image || `https://via.placeholder.com/300/1a1a1a/00ff41?text=PixelBeast+%23${tokenId}`;
-                const contractAddress = '0x1acd747b00d65e2e42433f0280e7dcb530de41d7';
-                const openseaUrl = beast.openseaUrl || `https://opensea.io/assets/ethereum/${contractAddress}/${tokenId}`;
+                const imageUrl = beast.image || `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Crect width='300' height='300' fill='%231a1a1a'/%3E%3Ctext x='50%25' y='45%25' font-family='monospace' font-size='20' fill='%23f7931a' text-anchor='middle'%3EAsset%3C/text%3E%3Ctext x='50%25' y='55%25' font-family='monospace' font-size='24' fill='%23f7931a' text-anchor='middle'%3E%23${tokenId}%3C/text%3E%3C/svg%3E`;
+                const openseaUrl = beast.openseaUrl;
 
                 return `
-                    <div class="beast-card">
-                        <a href="${openseaUrl}" target="_blank" class="beast-image-link">
-                            <img src="${imageUrl}" alt="${name}" class="beast-image" loading="lazy">
-                        </a>
-                        <div class="beast-info">
-                            <div class="beast-name">${name}</div>
-                            <div class="beast-id">ID: ${tokenId}</div>
-                            <a href="${openseaUrl}" target="_blank" class="beast-link">
-                                View on OpenSea →
+                    <div class="asset-card">
+                        <div class="asset-image-wrapper">
+                            <a href="${openseaUrl}" target="_blank" class="asset-image-link">
+                                <img src="${imageUrl}" alt="${name}" class="asset-image" loading="lazy">
+                            </a>
+                        </div>
+                        <div class="asset-info">
+                            <div class="asset-name">${name}</div>
+                            <div class="asset-id">TOKEN ${tokenId}</div>
+                            <a href="${openseaUrl}" target="_blank" class="view-asset">
+                                View Asset →
                             </a>
                         </div>
                     </div>
@@ -463,12 +545,6 @@
             }).join('');
         }
 
-        // Update counter
-        function updateCounter() {
-            counter.textContent = `Displaying ${filteredBeasts.length} of ${allBeasts.length} beasts`;
-        }
-
-        // Search functionality
         searchInput.addEventListener('input', (e) => {
             const searchTerm = e.target.value.toLowerCase();
             
@@ -479,10 +555,8 @@
             });
 
             displayBeasts(filteredBeasts);
-            updateCounter();
         });
 
-        // View controls
         gridViewBtn.addEventListener('click', () => {
             currentView = 'grid';
             gallery.classList.remove('list-view');
@@ -502,7 +576,6 @@
             loadAllBeasts();
         });
 
-        // Load beasts on page load
         loadAllBeasts();
     </script>
 </body>
