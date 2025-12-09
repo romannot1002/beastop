@@ -48,25 +48,21 @@ exports.handler = async function(event, context) {
                 const tokenId = nft.tokenId;
                 const contractAddress = '0x1acd747b00d65e2e42433f0280e7dcb530de41d7';
                 
-                // Get original image URL from Alchemy
-                let originalUrl = nft.image?.originalUrl || 
-                                 nft.image?.cachedUrl || 
-                                 nft.image?.thumbnailUrl || 
-                                 nft.raw?.metadata?.image ||
-                                 null;
+                // ONLY use Alchemy's cached/thumbnail URLs (these work!)
+                let imageUrl = nft.image?.cachedUrl || nft.image?.thumbnailUrl;
                 
-                let imageUrl;
+                // Skip if it's a Google Storage URL
+                if (imageUrl && imageUrl.includes('storage.googleapis.com')) {
+                    imageUrl = null;
+                }
                 
-                if (originalUrl) {
-                    // Proxy ALL images through our function
-                    imageUrl = `/.netlify/functions/proxy-image?url=${encodeURIComponent(originalUrl)}`;
-                    console.log(`Beast #${tokenId}: Proxying ${originalUrl}`);
-                } else {
-                    // SVG fallback if no image found
+                // If no cached image, use SVG with token number
+                if (!imageUrl) {
                     const svg = `data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Crect width='300' height='300' fill='%231a1a1a'/%3E%3Ctext x='50%25' y='45%25' font-family='monospace' font-size='20' fill='%2300ff41' text-anchor='middle'%3EPixelBeast%3C/text%3E%3Ctext x='50%25' y='55%25' font-family='monospace' font-size='24' fill='%2300ff41' text-anchor='middle'%3E%23${tokenId}%3C/text%3E%3C/svg%3E`;
                     imageUrl = svg;
-                    console.log(`Beast #${tokenId}: No image URL, using SVG`);
                 }
+                
+                console.log(`Beast #${tokenId}: ${imageUrl.substring(0, 100)}...`);
                 
                 return {
                     tokenId: tokenId,
