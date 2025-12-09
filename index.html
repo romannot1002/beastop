@@ -396,4 +396,72 @@
         // Display beasts in gallery
         function displayBeasts(beasts) {
             if (beasts.length === 0) {
-                gallery.innerHTML = '<div class="error">No beasts match your search
+                gallery.innerHTML = '<div class="error">No beasts match your search</div>';
+                return;
+            }
+
+            gallery.innerHTML = beasts.map(beast => {
+                const tokenId = beast.tokenId || 'Unknown';
+                const name = beast.name || `PixelBeast #${tokenId}`;
+                const imageUrl = beast.image || beast.imageUrl || 'https://via.placeholder.com/300?text=No+Image';
+                const openseaUrl = `https://opensea.io/assets/ethereum/0x1acd747b00d65e2e42433f0280e7dcb530de41d7/${tokenId}`;
+
+                return `
+                    <div class="beast-card">
+                        <img src="${imageUrl}" alt="${name}" class="beast-image" loading="lazy">
+                        <div class="beast-info">
+                            <div class="beast-name">${name}</div>
+                            <div class="beast-id">ID: ${tokenId}</div>
+                            <a href="${openseaUrl}" target="_blank" class="beast-link">
+                                View on OpenSea →
+                            </a>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update counter
+        function updateCounter() {
+            counter.textContent = `Displaying ${filteredBeasts.length} of ${allBeasts.length} beasts`;
+        }
+
+        // Search functionality
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            
+            filteredBeasts = allBeasts.filter(beast => {
+                const name = (beast.name || '').toLowerCase();
+                const tokenId = (beast.tokenId || '').toString();
+                return name.includes(searchTerm) || tokenId.includes(searchTerm);
+            });
+
+            displayBeasts(filteredBeasts);
+            updateCounter();
+        });
+
+        // View controls
+        gridViewBtn.addEventListener('click', () => {
+            currentView = 'grid';
+            gallery.classList.remove('list-view');
+            gridViewBtn.classList.add('active');
+            listViewBtn.classList.remove('active');
+        });
+
+        listViewBtn.addEventListener('click', () => {
+            currentView = 'list';
+            gallery.classList.add('list-view');
+            listViewBtn.classList.add('active');
+            gridViewBtn.classList.remove('active');
+        });
+
+        refreshBtn.addEventListener('click', () => {
+            searchInput.value = '';
+            loadAllBeasts();
+        });
+
+        // Load beasts on page load
+        loadAllBeasts();
+    </script>
+</body>
+</html>
